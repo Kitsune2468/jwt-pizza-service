@@ -23,12 +23,13 @@ async function createAdminUser() {
 }
 
 beforeAll(async () => {
-  //testUser.email = Math.random().toString(36).substring(2, 12) + '@test.com';
-  //const registerRes = await request(app).post('/api/auth').send(testUser);
-  //testUserAuthToken = registerRes.body.token;
-  //expectValidJwt(testUserAuthToken);
+  adminUser = createAdminUser();
+  const loginAdminRes = await request(app).put('/api/auth').send(adminUser);
+
+  adminAuthToken = loginAdminRes.body.token;
 });
 
-test('hello world', () => {
-    expect('hello' + ' world').toBe('hello world');
-  });
+test('get all franchises', async () => {
+  franchiseRes = await request(app).get('/api/franchise');
+  expect(franchiseRes.status).toBe(200);
+});
