@@ -23,9 +23,10 @@ async function createAdminUser() {
     user.name = randomName();
     user.email = user.name + '@admin.com';
   
-    user = await DB.addUser(user);
+    userRes = await DB.addUser(user);
   
-    return { ...user, password: 'toomanysecrets' };
+    //return { ...user, password: 'toomanysecrets' };
+    return [user, userRes];
 }
 
 beforeAll(async () => {
@@ -36,13 +37,13 @@ beforeAll(async () => {
 });
 
 test('create/login admin', async () => {
-    adminResult = createAdminUser();
-
-    const loginRes = await request(app).put('/api/auth').send(adminResult);
+    [adminUser, adminResult] = await createAdminUser();
+    const loginRes = await request(app).put('/api/auth').send(adminUser);
     expect(loginRes.status).toBe(200);
     expectValidJwt(loginRes.body.token);
+    testAdminAuthToken = loginRes.body.token;
 
-    const expectedUser = { ...testAdmin, roles: [{ role: 'Admin' }] };
+    const expectedUser = { ...adminUser, roles: [{ role: 'admin' }] };
     delete expectedUser.password;
     expect(loginRes.body.user).toMatchObject(expectedUser);
 
@@ -55,7 +56,7 @@ test('login & logout', async () => {
     expect(loginRes.status).toBe(200);
     expectValidJwt(loginRes.body.token);
 
-    const expectedUser = { ...testUser, roles: [{ role: 'diner' }] };
+    const expectedUser = { ...testUser, roles: [{ role: Role.Diner }] };
     delete expectedUser.password;
     expect(loginRes.body.user).toMatchObject(expectedUser);
 
