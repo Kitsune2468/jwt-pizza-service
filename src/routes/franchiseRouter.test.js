@@ -42,11 +42,13 @@ test('get all franchises', async () => {
   expect(franchiseRes.status).toBe(200);
 });
 
-test('create & delete franchise', async () => {
+test('create franchise', async () => {
   franchiseName = randomName();
-  franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: `${testAdminAuthToken}`, admins: [{ email: `${testAdminEmail}` }] });
+  const franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: `${testAdminAuthToken}`, admins: [{ email: `${testAdminEmail}` }] });
   expect(franchiseRes.status).toBe(200);
+});
 
+test('delete franchise', async () => {
   deleteRes = await request(app).delete('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`);
   expect(franchiseRes.status).toBe(200);
 });
