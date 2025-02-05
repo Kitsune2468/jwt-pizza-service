@@ -2,14 +2,14 @@ const request = require('supertest');
 const app = require('../service');
 const { DB, Role } = require('../../src/database/database');
 
-const testName = 'pizza diner';
-const testEmail = 'reg@test.com';
-const testPassword = 'a';
-const testUser = { name: testName, email: testEmail, password: testPassword };
+// Test user data
+const testUser = { name: 'pizza diner', email: 'reg@test.com', password: 'a' };
 let testUserAuthToken;
 
+// Test admin data
 let testAdminAuthToken;
 
+// Support functions
 function randomName() {
     return Math.random().toString(36).substring(2, 12);
 }
@@ -32,6 +32,7 @@ beforeAll(async () => {
     expectValidJwt(testUserAuthToken);
 });
 
+// Admin/user login tests
 test('create/login admin', async () => {
     [adminUser, adminResult] = await createAdminUser();
     const loginRes = await request(app).put('/api/auth').send(adminUser);
@@ -60,6 +61,7 @@ test('login & logout', async () => {
     expect(logoutRes.status).toBe(200);
 });
 
+// Bad login/register/logout tests
 test('bad login', async() => {
     const loginRes = await request(app).put('/api/auth').send();
     expect(loginRes.status).toBe(500);
