@@ -8,10 +8,6 @@ const testPassword = 'a';
 const testUser = { name: testName, email: testEmail, password: testPassword };
 let testUserAuthToken;
 
-const testAdminName = 'test admin';
-const testAdminEmail = 'admin@test.com';
-const testAdminPassword = 'a';
-const testAdmin = { name: testAdminName, email: testAdminEmail, password: testAdminPassword };
 let testAdminAuthToken;
 
 function randomName() {

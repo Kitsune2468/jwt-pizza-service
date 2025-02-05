@@ -8,10 +8,7 @@ const testPassword = 'a';
 const testUser = { name: testName, email: testEmail, password: testPassword };
 let testUserAuthToken;
 
-const testAdminName = 'test admin';
-const testAdminEmail = 'admin@test.com';
-const testAdminPassword = 'a';
-const testAdmin = { name: testAdminName, email: testAdminEmail, password: testAdminPassword };
+testAdminEmail = "admin@test.com";
 let testAdminAuthToken;
 
 function randomName() {
@@ -23,28 +20,27 @@ async function createAdminUser() {
   user.name = randomName();
   user.email = user.name + '@admin.com';
 
-  user = await DB.addUser(user);
+  userRes = await DB.addUser(user);
 
-  return { ...user, password: 'toomanysecrets' };
+  //return { ...user, password: 'toomanysecrets' };
+  return [user, userRes];
 }
 
 beforeAll(async () => {
-  adminUser = createAdminUser();
-  const loginAdminRes = await request(app).put('/api/auth').send(adminUser);
-
-  console.log(loginAdminRes);
-  adminAuthToken = loginAdminRes.body.token;
-  adminEmail = adminUser.email;
+  [adminUser, adminResult] = await createAdminUser();
+  const loginRes = await request(app).put('/api/auth').send(adminUser);
+  testAdminAuthToken = loginRes.body.token;
+  console.log(testAdminAuthToken);
+  testAdminEmail = adminUser.email;
+  console.log(testAdminEmail);
 });
 
 test('get all franchises', async () => {
   franchiseRes = await request(app).get('/api/franchise');
   expect(franchiseRes.status).toBe(200);
 });
-/*
-test('create franchises', async () => {
-  console.log(adminEmail);
-  franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${adminAuthToken}`).send({ name: 'TestFranchise', admins: [{ email: adminEmail }] });
+
+test('create franchise', async () => {
+  const franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: 'TestFranchise', admins: [{ email: testAdminEmail }] });
   expect(franchiseRes.status).toBe(200);
 });
-*/
