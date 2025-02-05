@@ -30,9 +30,11 @@ beforeAll(async () => {
   [adminUser, adminResult] = await createAdminUser();
   const loginRes = await request(app).put('/api/auth').send(adminUser);
   testAdminAuthToken = loginRes.body.token;
-  console.log(testAdminAuthToken);
   testAdminEmail = adminUser.email;
-  console.log(testAdminEmail);
+
+  testUser.email = randomName() + '@test.com';
+  const registerRes = await request(app).post('/api/auth').send(testUser);
+  testUserAuthToken = registerRes.body.token;
 });
 
 test('get all franchises', async () => {
@@ -40,7 +42,18 @@ test('get all franchises', async () => {
   expect(franchiseRes.status).toBe(200);
 });
 
-test('create franchise', async () => {
-  const franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: 'TestFranchise', admins: [{ email: testAdminEmail }] });
+test('create & delete franchise', async () => {
+  franchiseName = randomName();
+  franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: `${testAdminAuthToken}`, admins: [{ email: `${testAdminEmail}` }] });
+  expect(franchiseRes.status).toBe(200);
+
+  deleteRes = await request(app).delete('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`);
   expect(franchiseRes.status).toBe(200);
 });
+
+test('bad create franchise by user', async () => {
+  franchiseName = randomName();
+  const franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testUserAuthToken}`).send({ name: `${testUserAuthToken}`, admins: [{ email: `${testUser.email}` }] });
+  expect(franchiseRes.status).toBe(403);
+});
+
