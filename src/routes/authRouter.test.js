@@ -21,8 +21,8 @@ async function createAdminUser() {
   
     const userRes = await DB.addUser(user);
   
-    //return { ...user, password: 'toomanysecrets' };
-    return [user, userRes];
+    return { ...userRes, password: 'toomanysecrets' };
+    //return [user, userRes];
 }
 
 beforeAll(async () => {
@@ -34,7 +34,8 @@ beforeAll(async () => {
 
 // Admin/user login tests
 test('create/login admin', async () => {
-    [adminUser, adminResult] = await createAdminUser();
+    var adminUser;
+    adminUser = await createAdminUser();
     const loginRes = await request(app).put('/api/auth').send(adminUser);
     expect(loginRes.status).toBe(200);
     expectValidJwt(loginRes.body.token);

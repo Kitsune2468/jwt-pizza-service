@@ -7,18 +7,16 @@ const testUser = { name: 'pizza diner', email: 'reg@test.com', password: 'a' };
 let testUserAuthToken;
 
 // Test admin data
-testAdminEmail = "admin@test.com";
-testAdminID = 0;
+var testAdminEmail = "admin@test.com";
 let testAdminAuthToken;
 
 // Test franchise data
-testFranchiseID = "";
-testStoreID = 0;
+var testFranchiseID = "";
+var testStoreID = 0;
 
 // Test item/order data
-testItemID = 0;
-testItemDescription = "Test Pizza";
-testItemPrice = 0.001;
+var testItemID = 0;
+var testItemDescription = "Test Pizza";
 
 // Support functions
 function randomName() {
@@ -30,19 +28,19 @@ async function createAdminUser() {
   user.name = randomName();
   user.email = user.name + '@admin.com';
 
-  userRes = await DB.addUser(user);
+  const userRes = await DB.addUser(user);
 
-  //return { ...user, password: 'toomanysecrets' };
-  return [user, userRes];
+  return { ...userRes, password: 'toomanysecrets' };
+  //return [user, userRes];
 }
 
 beforeAll(async () => {
   // Create test admin
-  [adminUser, adminResult] = await createAdminUser();
+  var adminUser;
+  adminUser = await createAdminUser();
   const loginRes = await request(app).put('/api/auth').send(adminUser);
   testAdminAuthToken = loginRes.body.token;
   testAdminEmail = adminUser.email;
-  testAdminID = loginRes.body.id;
 
   // Create test user
   testUser.email = randomName() + '@test.com';
@@ -50,34 +48,31 @@ beforeAll(async () => {
   testUserAuthToken = registerRes.body.token;
 
   // Create test franchise
-  franchiseName = randomName();
-  franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: `${franchiseName}`, admins: [{ email: `${testAdminEmail}` }] });
+  const franchiseName = randomName();
+  const franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ name: `${franchiseName}`, admins: [{ email: `${testAdminEmail}` }] });
   testFranchiseID = franchiseRes.body.id;
-  storeName = randomName();
-  storeRes = await request(app).post(`/api/franchise/${testFranchiseID}/store`).set('Authorization', `Bearer ${testAdminAuthToken}`).send({ franchiseID: `${testFranchiseID}`,name: `${storeName}`});
+  const storeName = randomName();
+  const storeRes = await request(app).post(`/api/franchise/${testFranchiseID}/store`).set('Authorization', `Bearer ${testAdminAuthToken}`).send({ franchiseID: `${testFranchiseID}`,name: `${storeName}`});
   testStoreID = storeRes.body.id;
 });
 
 // Get menu
 test('get menu', async () => {
-  menuRes = await request(app).get('/api/order/menu');
+  const menuRes = await request(app).get('/api/order/menu');
   expect(menuRes.status).toBe(200);
 });
 
 // Create item for menu
 test('create item', async () => {
-  pizzaName = randomName();
-  itemRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ title: `${pizzaName}`, description: `${testItemDescription}`, image: "pizza1.png", price: 0.001 });
+  const pizzaName = randomName();
+  const itemRes = await request(app).put('/api/order/menu').set('Authorization', `Bearer ${testAdminAuthToken}`).send({ title: `${pizzaName}`, description: `${testItemDescription}`, image: "pizza1.png", price: 0.001 });
   expect(itemRes.status).toBe(200);
-  console.log(itemRes.body);
   testItemID = itemRes.body[itemRes.body.length-1].id;
-  
 });
 
 // Create order
 test('create item', async () => {
-  pizzaName = randomName();
-  itemRes = await request(app).post('/api/order')
+  const itemRes = await request(app).post('/api/order')
   .set('Authorization', `Bearer ${testUserAuthToken}`)
   .send({ franchiseId: `${testFranchiseID}`, storeId: `${testStoreID}`, items:[{ menuId: `${testItemID}`, description: `${testItemDescription}`, price: 0.001 }] });
   expect(itemRes.status).toBe(200);
@@ -85,7 +80,7 @@ test('create item', async () => {
 
 // Get user order
 test('create item', async () => {
-  itemRes = await request(app).get('/api/order')
+  const itemRes = await request(app).get('/api/order')
   .set('Authorization', `Bearer ${testUserAuthToken}`);
   expect(itemRes.status).toBe(200);
 });
