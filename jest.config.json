@@ -6,6 +6,6 @@
         "lines": 80
         }
     },
-    "testPathIgnorePatterns": ["src/metrics.js"]
-      
+    "testPathIgnorePatterns": ["src/metrics.js"],
+    "coveragePathIgnorePatterns": ["src/metrics.js"]
 }
