@@ -17,9 +17,12 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(metrics.requestTracker(req, res, next));
-app.use('/order/post', metrics.pizzaLatencyTracker(req, res, next));
-app.use('/auth', metrics.activeUserTracker(req, res, next));
+const requestTracker = metrics.requestTracker();
+const pizzaLatencyTracker = metrics.pizzaLatencyTracker();
+const activeUserTracker = metrics.activeUserTracker();
+app.use(requestTracker);
+app.use('/order/post', pizzaLatencyTracker);
+app.use('/auth', activeUserTracker);
 
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
