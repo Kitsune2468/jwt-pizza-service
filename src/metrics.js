@@ -108,7 +108,7 @@ function sendMetricsPeriodically(period) {
         statsMetrics();
 
         sendMetricsToGrafana();
-        metrics = [];
+        currentMetrics = [];
       } catch (error) {
         console.log(timer);
         console.log('Error sending metrics', error);
@@ -123,7 +123,7 @@ function sendMetricsToGrafana() {
       {
         scopeMetrics: [
           {
-            metrics: statsMetrics
+            metrics: stringMetrics
           },
         ],
       },
