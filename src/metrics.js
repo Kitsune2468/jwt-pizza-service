@@ -1,4 +1,3 @@
-const internal = require('stream');
 const config = require('./config');
 const os = require('os');
 
