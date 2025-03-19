@@ -118,18 +118,18 @@ function sendMetricsPeriodically(period) {
   }
 
 function sendMetricsToGrafana() {
-    const stringMetrics = JSON.stringify(currentMetrics);
-  const metric = {
-    resourceMetrics: [
-      {
-        scopeMetrics: [
-          {
-            metrics: stringMetrics
-          },
+    //const stringMetrics = JSON.stringify(currentMetrics);
+    const metric = {
+        resourceMetrics: [
+            {
+            scopeMetrics: [
+                {
+                metrics: currentMetrics
+                },
+            ],
+            },
         ],
-      },
-    ],
-  };
+    };
 
   const body = JSON.stringify(metric);
   fetch(`${config.metrics.url}`, {
