@@ -48,11 +48,19 @@ function statsMetrics() {
     addMetric('failedAuth', failedAuth, 'sum', '1');
 
     // TODO: Latency calcs
-    requestLat = (totalReqLatency / totalRequests);
-    requestLat.toFixed(0);
+    if(totalRequests == 0) {
+        requestLat = (totalReqLatency / totalRequests);
+        requestLat = requestLat.toFixed(2) * 100;
+    } else {
+        requestLat = 0;
+    }
     addMetric('requestLatency', requestLat, 'histogram', 'ms');
-    pizzaLat = (totalPizzaLatency / numPizzaReq);
-    pizzaLat.toFixed(0);
+    if(totalRequests == 0) {
+        pizzaLat = (totalPizzaLatency / numPizzaReq);
+        pizzaLat = pizzaLat.toFixed(2) * 100;
+    } else {
+        pizzaLat = 0;
+    }
     addMetric('pizzaLatency', pizzaLat, 'histogram', 'ms');
     
     addMetric('pizzasSold', pizzasSold, 'sum', '1');
@@ -101,6 +109,34 @@ function addMetric(metricName, metricValue, type, unit) {
     currentMetrics.push(metric);
 }
 
+function resetMetrics() {
+    currentMetrics = [];
+
+    // http Metrics
+    totalRequests = 0;
+    deleteRequests = 0;
+    getRequests = 0;
+    postRequests = 0;
+    putRequests = 0;
+
+    // system Metrics
+    memoryUsage = 0;
+    cpuUsage = 0;
+
+    // stats Metrics
+    successfulAuth = 0;
+    failedAuth = 0;
+    totalReqLatency
+    requestLat = 0;
+    totalPizzaLatency = 0;
+    pizzaLat = 0;
+    numPizzaReq = 0;
+    activeUsers = 0;
+    pizzasSold = 0;
+    pizzaFails = 0;
+    revenue = 0;
+}
+
 function sendMetricsPeriodically(period) {
     const timer = setInterval(() => {
       try {
@@ -109,7 +145,7 @@ function sendMetricsPeriodically(period) {
         statsMetrics();
 
         sendMetricsToGrafana();
-        currentMetrics = [];
+        resetMetrics();
       } catch (error) {
         console.log(timer);
         console.log('Error sending metrics', error);
