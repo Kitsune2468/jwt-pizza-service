@@ -17,7 +17,9 @@ let cpuUsage = 0;
 // stats Metrics
 let successfulAuth = 0;
 let failedAuth = 0;
+let totalReqLatency
 let requestLat = 0;
+let totalPizzaLatency = 0;
 let pizzaLat = 0;
 let numPizzaReq = 0;
 let activeUsers = 0;
@@ -46,6 +48,8 @@ function statsMetrics() {
     addMetric('failedAuth', failedAuth, 'sum', '1');
 
     // TODO: Latency calcs
+    requestLat = (totalReqLatency / totalRequests);
+    requestLat.toFixed(0);
     addMetric('requestLatency', requestLat, 'histogram', 'ms');
     addMetric('pizzaLatency', pizzaLat, 'histogram', 'ms');
     
@@ -175,32 +179,56 @@ async function requestTracker(req, res, next) {
     res.on('finish', () => {
         const end = Date.now();
         const duration = end - start;
-        requestLat += duration;
-        numPizzaReq++;
+        totalReqLatency += duration;
     });
 
     next();
 }
 
-function addActiveUser(){
-    activeUsers++;
+async function activeUserTracker(req, res, next) {
+    switch(req.method) {
+        case 'PUT':
+            activeUsers++;
+            res.on('finish', () => {
+                successfulAuth++;
+            });
+        
+            res.on('error', () => {
+                failedAuth++;
+            });
+            break;
+        case 'DELETE':
+            activeUsers--;
+            break;
+    }
+
+    next();
 }
 
-function removeActiveUser(){
-    activeUsers--;
-}
-
-const pizzaLatency = (req, res, next) => {
+async function pizzaLatencyTracker(req, res, next) {
     const start = Date.now();
+    numPizzaReq++;
 
     res.on('finish', () => {
         const end = Date.now();
         const duration = end - start;
         pizzaLat += duration;
-        numPizzaReq++;
+
+        const orderItems = res.body.order.items;
+        pizzasSold += orderItems.length;
+
+        const orderRevenue = 0;
+        orderItems.forEach(item => {
+            orderRevenue += item.price;
+        });
+        revenue += orderRevenue;
+    });
+    res.on('error', () => {
+        totalPizzaLatency += duration;
+        pizzaFails++;
     });
 
     next();
 };
 
-module.exports = requestTracker, addActiveUser, removeActiveUser;
+module.exports = requestTracker, pizzaLatencyTracker;
