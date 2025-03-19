@@ -6,9 +6,7 @@
         "lines": 80
         }
     },
-    "jest": {
-        "testPathIgnorePatterns": [
-        "metrics\\.js$"
-        ]
-    }
+    "testPathIgnorePatterns": [
+    "metrics\\.js$"
+    ]
 }
