@@ -1,8 +1,28 @@
 const config = require('./config');
 const os = require('os');
 
-let requests = 0;
-let latency = 0;
+let totalRequests = 0;
+let deleteRequests = 0;
+let getRequests = 0;
+let postRequests = 0;
+let putRequests = 0;
+
+let activeUsers = 0;
+
+let successfulAuth = 0;
+let failedAuth = 0;
+
+let totalMem = 0;
+let currentMem = 0;
+let freeMem = 0;
+let cpuUsage = 0;
+
+let pizzasSold = 0;
+let pizzaFails = 0;
+let revenue = 0;
+
+let requestLatency = 0;
+let pizzaLatency = 0;
 
 setInterval(() => {
   const cpuValue = Math.floor(Math.random() * 100) + 1;
