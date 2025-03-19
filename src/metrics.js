@@ -1,6 +1,8 @@
 const config = require('./config');
 const os = require('os');
 
+let metrics = [];
+
 let totalRequests = 0;
 let deleteRequests = 0;
 let getRequests = 0;
@@ -23,6 +25,48 @@ let revenue = 0;
 
 let requestLatency = 0;
 let pizzaLatency = 0;
+
+function httpMetrics() {
+    totalRequests = deleteRequests + getRequests + postRequests + putRequests;
+    addMetric('totalRequests', totalRequests, 'sum', '1');
+    addMetric('getRequests', getRequests, 'sum', '1');
+    addMetric('postRequests', postRequests, 'sum', '1');
+    addMetric('putRequests', putRequests, 'sum', '1');
+    addMetric('deleteRequests', deleteRequests, 'sum', '1');
+}
+
+function addMetric(metricName, metricValue, type, unit) {
+    const metric = {
+        resourceMetrics: [
+          {
+            scopeMetrics: [
+              {
+                metrics: [
+                  {
+                    name: metricName,
+                    unit: unit,
+                    [type]: {
+                      dataPoints: [
+                        {
+                          asInt: metricValue,
+                          timeUnixNano: Date.now() * 1000000,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    
+      if (type === 'sum') {
+        metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE';
+        metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].isMonotonic = true;
+      }
+      metrics.push(metric);
+}
 
 setInterval(() => {
   const cpuValue = Math.floor(Math.random() * 100) + 1;
