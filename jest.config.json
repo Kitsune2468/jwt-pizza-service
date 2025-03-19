@@ -5,5 +5,10 @@
         "global": {
         "lines": 80
         }
+    },
+    "jest": {
+        "testPathIgnorePatterns": [
+        "metrics\\.js$"
+        ]
     }
 }
