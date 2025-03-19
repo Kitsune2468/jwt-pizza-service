@@ -13,19 +13,19 @@ let putRequests = 0;
 // system Metrics
 let memoryUsage = 0;
 let cpuUsage = 0;
-let successfulAuth = 0;
-let failedAuth = 0;
-let requestLatency = 0;
-let pizzaLatency = 0;
 
 // stats Metrics
+let successfulAuth = 0;
+let failedAuth = 0;
+let requestLat = 0;
+let pizzaLat = 0;
+let numPizzaReq = 0;
 let activeUsers = 0;
 let pizzasSold = 0;
 let pizzaFails = 0;
 let revenue = 0;
 
 function httpMetrics() {
-    totalRequests = deleteRequests + getRequests + postRequests + putRequests;
     addMetric('totalRequests', totalRequests, 'sum', '1');
     addMetric('getRequests', getRequests, 'sum', '1');
     addMetric('postRequests', postRequests, 'sum', '1');
@@ -38,17 +38,17 @@ function systemMetrics() {
     cpuUsage = getCpuUsagePercentage();
     addMetric('memoryUsage', memoryUsage, 'gauge', '%');
     addMetric('cpuUsage', cpuUsage, 'gauge', '%');
-
-    addMetric('successfulAuth', successfulAuth, 'sum', '1');
-    addMetric('failedAuth', failedAuth, 'sum', '1');
-
-    // TODO: Latency calcs
-    addMetric('requestLatency', requestLatency, 'histogram', 'ms');
-    addMetric('pizzaLatency', pizzaLatency, 'histogram', 'ms');
 }
 
 function statsMetrics() {
     addMetric('activeUsers', activeUsers, 'sum', '1');
+    addMetric('successfulAuth', successfulAuth, 'sum', '1');
+    addMetric('failedAuth', failedAuth, 'sum', '1');
+
+    // TODO: Latency calcs
+    addMetric('requestLatency', requestLat, 'histogram', 'ms');
+    addMetric('pizzaLatency', pizzaLat, 'histogram', 'ms');
+    
     addMetric('pizzasSold', pizzasSold, 'sum', '1');
     addMetric('pizzaFails', pizzaFails, 'sum', '1');
     addMetric('revenue', revenue, 'sum', '1');
@@ -153,3 +153,54 @@ function sendMetricToGrafana(metricName, metricValue, type, unit) {
       console.error('Error pushing metrics:', error);
     });
 }
+
+async function requestTracker(req, res, next) {
+    const start = Date.now();
+    totalRequests++;
+    switch(req.method) {
+        case 'GET':
+            getRequests++;
+            break;
+        case 'POST':
+            postRequests++;
+            break;
+        case 'PUT':
+            putRequests++;
+            break;
+        case 'DELETE':
+            deleteRequests++;
+            break;
+    }
+
+    res.on('finish', () => {
+        const end = Date.now();
+        const duration = end - start;
+        requestLat += duration;
+        numPizzaReq++;
+    });
+
+    next();
+}
+
+function addActiveUser(){
+    activeUsers++;
+}
+
+function removeActiveUser(){
+    activeUsers--;
+}
+
+const pizzaLatency = (req, res, next) => {
+    const start = Date.now();
+
+    res.on('finish', () => {
+        const end = Date.now();
+        const duration = end - start;
+        pizzaLat += duration;
+        numPizzaReq++;
+    });
+
+    next();
+};
+
+module.exports = requestTracker, addActiveUser, removeActiveUser;
