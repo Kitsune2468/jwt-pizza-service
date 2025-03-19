@@ -1,7 +1,7 @@
 const config = require('./config');
 const os = require('os');
 
-let metrics = [];
+let currentMetrics = [];
 
 // http Metrics
 let totalRequests = 0;
@@ -97,7 +97,7 @@ function addMetric(metricName, metricValue, type, unit) {
     metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE';
     metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].isMonotonic = true;
     }
-    metrics.push(metric);
+    currentMetrics.push(metric);
 }
 
 function sendMetricsPeriodically(period) {
@@ -107,7 +107,7 @@ function sendMetricsPeriodically(period) {
         systemMetrics();
         statsMetrics();
 
-        sendMetricToGrafana(metrics);
+        sendMetricsToGrafana();
         metrics = [];
       } catch (error) {
         console.log(timer);
@@ -116,13 +116,14 @@ function sendMetricsPeriodically(period) {
     }, period);
   }
 
-function sendMetricToGrafana(metrics) {
+function sendMetricsToGrafana() {
+    const stringMetrics = JSON.stringify(currentMetrics);
   const metric = {
     resourceMetrics: [
       {
         scopeMetrics: [
           {
-            metrics: metrics,
+            metrics: statsMetrics
           },
         ],
       },
