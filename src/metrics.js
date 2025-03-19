@@ -54,14 +54,14 @@ function statsMetrics() {
     } else {
         requestLat = 0;
     }
-    addMetric('requestLatency', requestLat, 'histogram', 'ms');
+    addMetric('requestLatency', requestLat, 'sum', 'ms');
     if(totalRequests == 0) {
         pizzaLat = (totalPizzaLatency / numPizzaReq);
         pizzaLat = pizzaLat.toFixed(2) * 100;
     } else {
         pizzaLat = 0;
     }
-    addMetric('pizzaLatency', pizzaLat, 'histogram', 'ms');
+    addMetric('pizzaLatency', pizzaLat, 'sum', 'ms');
     
     addMetric('pizzasSold', pizzasSold, 'sum', '1');
     addMetric('pizzaFails', pizzaFails, 'sum', '1');
