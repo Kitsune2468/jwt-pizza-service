@@ -77,6 +77,7 @@ function addMetric(metricName, metricValue, type, unit) {
     const metric = {
         name: metricName,
         unit: unit,
+        description: "",
         [type]: {
             dataPoints: [
                 {
