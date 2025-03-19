@@ -1,3 +1,4 @@
+const internal = require('stream');
 const config = require('./config');
 const os = require('os');
 
@@ -51,6 +52,8 @@ function statsMetrics() {
     requestLat = (totalReqLatency / totalRequests);
     requestLat.toFixed(0);
     addMetric('requestLatency', requestLat, 'histogram', 'ms');
+    pizzaLat = (totalPizzaLatency / numPizzaReq);
+    pizzaLat.toFixed(0);
     addMetric('pizzaLatency', pizzaLat, 'histogram', 'ms');
     
     addMetric('pizzasSold', pizzasSold, 'sum', '1');
@@ -102,6 +105,7 @@ function sendMetricsPeriodically(period) {
         sendMetricToGrafana(metrics);
         metrics = [];
       } catch (error) {
+        console.log(timer);
         console.log('Error sending metrics', error);
       }
     }, period);
@@ -120,11 +124,6 @@ function sendMetricToGrafana(metrics) {
     ],
   };
 
-  if (type === 'sum') {
-    metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE';
-    metric.resourceMetrics[0].scopeMetrics[0].metrics[0][type].isMonotonic = true;
-  }
-
   const body = JSON.stringify(metric);
   fetch(`${config.url}`, {
     method: 'POST',
@@ -137,7 +136,7 @@ function sendMetricToGrafana(metrics) {
           console.error(`Failed to push metrics data to Grafana: ${text}\n${body}`);
         });
       } else {
-        console.log(`Pushed ${metricName}`);
+        console.log(`Pushed metrics`);
       }
     })
     .catch((error) => {
@@ -199,19 +198,18 @@ async function pizzaLatencyTracker(req, res, next) {
     res.on('finish', () => {
         const end = Date.now();
         const duration = end - start;
-        pizzaLat += duration;
+        totalPizzaLatency += duration;
 
         const orderItems = res.body.order.items;
         pizzasSold += orderItems.length;
 
-        const orderRevenue = 0;
+        let orderRevenue = 0;
         orderItems.forEach(item => {
             orderRevenue += item.price;
         });
         revenue += orderRevenue;
     });
     res.on('error', () => {
-        totalPizzaLatency += duration;
         pizzaFails++;
     });
 
