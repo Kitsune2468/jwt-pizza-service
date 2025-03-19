@@ -217,4 +217,4 @@ async function pizzaLatencyTracker(req, res, next) {
 
 sendMetricsPeriodically(60000);
 
-module.exports = requestTracker, activeUserTracker, pizzaLatencyTracker;
+module.exports = {requestTracker, activeUserTracker, pizzaLatencyTracker};

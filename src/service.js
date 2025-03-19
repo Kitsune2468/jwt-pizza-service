@@ -17,12 +17,10 @@ app.use((req, res, next) => {
   next();
 });
 
-const requestTracker = metrics.requestTracker();
-const pizzaLatencyTracker = metrics.pizzaLatencyTracker();
-const activeUserTracker = metrics.activeUserTracker();
-app.use(requestTracker);
-app.use('/order/post', pizzaLatencyTracker);
-app.use('/auth', activeUserTracker);
+
+app.use(metrics.requestTracker);
+app.use('/order/post', metrics.pizzaLatencyTracker);
+app.use('/auth', metrics.activeUserTracker);
 
 const apiRouter = express.Router();
 app.use('/api', apiRouter);
