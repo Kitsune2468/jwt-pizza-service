@@ -8,6 +8,9 @@
     "test": "jest",
     "lint": "eslint ."
   },
+  "jest": {
+        "testPathIgnorePatterns": ["metrics.js"]
+      },
   "license": "MIT",
   "dependencies": {
     "bcrypt": "^5.1.1",

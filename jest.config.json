@@ -5,8 +5,5 @@
         "global": {
         "lines": 80
         }
-    },
-    "testPathIgnorePatterns": [
-    "metrics\\.js$"
-    ]
+    }
 }
