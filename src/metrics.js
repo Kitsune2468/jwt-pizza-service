@@ -44,6 +44,14 @@ function systemMetrics() {
 
     // TODO: Latency calcs
     addMetric('requestLatency', requestLatency, 'histogram', 'ms');
+    addMetric('pizzaLatency', pizzaLatency, 'histogram', 'ms');
+}
+
+function statsMetrics() {
+    addMetric('activeUsers', activeUsers, 'sum', '1');
+    addMetric('pizzasSold', pizzasSold, 'sum', '1');
+    addMetric('pizzaFails', pizzaFails, 'sum', '1');
+    addMetric('revenue', revenue, 'sum', '1');
 }
 
 function getCpuUsagePercentage() {
@@ -83,6 +91,10 @@ function addMetric(metricName, metricValue, type, unit) {
 function sendMetricsPeriodically(period) {
     const timer = setInterval(() => {
       try {
+        httpMetrics();
+        systemMetrics();
+        statsMetrics();
+
         this.sendMetricToGrafana(metrics);
         metrics = [];
       } catch (error) {
