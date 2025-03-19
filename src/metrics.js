@@ -99,7 +99,7 @@ function sendMetricsPeriodically(period) {
         systemMetrics();
         statsMetrics();
 
-        this.sendMetricToGrafana(metrics);
+        sendMetricToGrafana(metrics);
         metrics = [];
       } catch (error) {
         console.log('Error sending metrics', error);
@@ -107,26 +107,13 @@ function sendMetricsPeriodically(period) {
     }, period);
   }
 
-function sendMetricToGrafana(metricName, metricValue, type, unit) {
+function sendMetricToGrafana(metrics) {
   const metric = {
     resourceMetrics: [
       {
         scopeMetrics: [
           {
-            metrics: [
-              {
-                name: metricName,
-                unit: unit,
-                [type]: {
-                  dataPoints: [
-                    {
-                      asInt: metricValue,
-                      timeUnixNano: Date.now() * 1000000,
-                    },
-                  ],
-                },
-              },
-            ],
+            metrics: metrics,
           },
         ],
       },
@@ -231,4 +218,6 @@ async function pizzaLatencyTracker(req, res, next) {
     next();
 };
 
-module.exports = requestTracker, pizzaLatencyTracker;
+sendMetricsPeriodically(60000);
+
+module.exports = requestTracker, activeUserTracker, pizzaLatencyTracker;
