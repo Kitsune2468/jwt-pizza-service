@@ -11,21 +11,21 @@ let postRequests = 0;
 let putRequests = 0;
 
 // system Metrics
-let memoryUsage = 0;
-let cpuUsage = 0;
+let memoryUsage = 0.0;
+let cpuUsage = 0.0;
 
 // stats Metrics
 let successfulAuth = 0;
 let failedAuth = 0;
 let totalReqLatency = 0;
-let requestLat = 0;
+let requestLat = 0.0;
 let totalPizzaLatency = 0;
-let pizzaLat = 0;
+let pizzaLat = 0.0;
 let numPizzaReq = 0;
 let activeUsers = 0;
 let pizzasSold = 0;
 let pizzaFails = 0;
-let revenue = 0;
+let revenue = 0.0;
 
 function httpMetrics() {
     addMetric('totalRequests', totalRequests, 'sum', '1');
@@ -43,29 +43,29 @@ function systemMetrics() {
 }
 
 function statsMetrics() {
-    addMetric('activeUsers', activeUsers, 'sum', '1');
-    addMetric('successfulAuth', successfulAuth, 'sum', '1');
-    addMetric('failedAuth', failedAuth, 'sum', '1');
+    addIntMetric('activeUsers', activeUsers, 'sum', '1');
+    addIntMetric('successfulAuth', successfulAuth, 'sum', '1');
+    addIntMetric('failedAuth', failedAuth, 'sum', '1');
 
     // TODO: Latency calcs
     if(totalRequests == 0) {
         requestLat = (totalReqLatency / totalRequests);
-        requestLat = requestLat.toFixed(2) * 100;
+        requestLat = Math.floor(requestLat) * 100;
     } else {
         requestLat = 0;
     }
-    addMetric('requestLatency', requestLat, 'sum', 'ms');
+    addIntMetric('requestLatency', requestLat, 'sum', 'ms');
     if(totalRequests == 0) {
         pizzaLat = (totalPizzaLatency / numPizzaReq);
-        pizzaLat = pizzaLat.toFixed(2) * 100;
+        pizzaLat = Math.floor(pizzaLat) * 100;
     } else {
         pizzaLat = 0;
     }
-    addMetric('pizzaLatency', pizzaLat, 'sum', 'ms');
+    addIntMetric('pizzaLatency', pizzaLat, 'sum', 'ms');
     
-    addMetric('pizzasSold', pizzasSold, 'sum', '1');
-    addMetric('pizzaFails', pizzaFails, 'sum', '1');
-    addMetric('revenue', revenue, 'sum', '1');
+    addIntMetric('pizzasSold', pizzasSold, 'sum', '1');
+    addIntMetric('pizzaFails', pizzaFails, 'sum', '1');
+    addDoubleMetric('revenue', revenue, 'sum', '1');
 }
 
 function getCpuUsagePercentage() {
@@ -81,7 +81,7 @@ function getMemoryUsagePercentage() {
   return memoryUsage.toFixed(2) * 100;
 }
 
-function addMetric(metricName, metricValue, type, unit) {
+function addIntMetric(metricName, metricValue, type, unit) {
     const metric = {
         name: metricName,
         unit: unit,
@@ -90,6 +90,34 @@ function addMetric(metricName, metricValue, type, unit) {
             dataPoints: [
                 {
                     asInt: metricValue,
+                    timeUnixNano: Date.now() * 1000000,
+                    attributes: [
+                        {
+                            key: "source",
+                            value: { "stringValue": "jwt-pizza-service" }
+                        }
+                    ]
+                },
+            ],
+        },
+    };
+    
+    if (type === 'sum') {
+    metric[type].aggregationTemporality = 'AGGREGATION_TEMPORALITY_CUMULATIVE';
+    metric[type].isMonotonic = true;
+    }
+    currentMetrics.push(metric);
+}
+
+function addDoubleMetric(metricName, metricValue, type, unit) {
+    const metric = {
+        name: metricName,
+        unit: unit,
+        description: "",
+        [type]: {
+            dataPoints: [
+                {
+                    asDouble: metricValue,
                     timeUnixNano: Date.now() * 1000000,
                     attributes: [
                         {
@@ -205,7 +233,15 @@ async function requestTracker(req, res, next) {
             break;
     }
 
+    res.on('finish', () => {
+        console.log("Hit finish requestTracker");
+        const end = Date.now();
+        const duration = end - start;
+        totalReqLatency += duration;
+    });
+
     res.on('close', () => {
+        console.log("Hit close requestTracker");
         const end = Date.now();
         const duration = end - start;
         totalReqLatency += duration;
@@ -218,7 +254,7 @@ async function activeUserTracker(req, res, next) {
     switch(req.method) {
         case 'PUT':
             activeUsers++;
-            res.on('close', () => {
+            res.on('finish', () => {
                 console.log("DEBUG: Hit successfulAuth");
                 successfulAuth++;
             });
@@ -255,6 +291,7 @@ async function pizzaLatencyTracker(req, res, next) {
         });
         revenue += orderRevenue;
     });
+    
     res.on('error', () => {
         pizzaFails++;
     });
