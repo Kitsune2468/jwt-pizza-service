@@ -233,8 +233,6 @@ async function requestTracker(req, res, next) {
             break;
     }
 
-    const send = res.send;
-
     res.on('finish', () => {
         console.log("Start Hit requestTracker finish");
         const end = Date.now();
