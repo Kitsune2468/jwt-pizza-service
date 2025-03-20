@@ -17,7 +17,7 @@ let cpuUsage = 0;
 // stats Metrics
 let successfulAuth = 0;
 let failedAuth = 0;
-let totalReqLatency
+let totalReqLatency = 0;
 let requestLat = 0;
 let totalPizzaLatency = 0;
 let pizzaLat = 0;
@@ -205,7 +205,7 @@ async function requestTracker(req, res, next) {
             break;
     }
 
-    res.on('finish', () => {
+    res.on('close', () => {
         const end = Date.now();
         const duration = end - start;
         totalReqLatency += duration;
@@ -218,11 +218,13 @@ async function activeUserTracker(req, res, next) {
     switch(req.method) {
         case 'PUT':
             activeUsers++;
-            res.on('finish', () => {
+            res.on('close', () => {
+                console.log("DEBUG: Hit successfulAuth");
                 successfulAuth++;
             });
         
             res.on('error', () => {
+                console.log("DEBUG: Hit failedAuth");
                 failedAuth++;
             });
             break;
@@ -230,6 +232,7 @@ async function activeUserTracker(req, res, next) {
             activeUsers--;
             break;
     }
+    console.log("DEBUG: Hit active user tracker");
 
     next();
 }
@@ -238,7 +241,7 @@ async function pizzaLatencyTracker(req, res, next) {
     const start = Date.now();
     numPizzaReq++;
 
-    res.on('finish', () => {
+    res.on('close', () => {
         const end = Date.now();
         const duration = end - start;
         totalPizzaLatency += duration;
