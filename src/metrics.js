@@ -28,18 +28,18 @@ let pizzaFails = 0;
 let revenue = 0.0;
 
 function httpMetrics() {
-    addMetric('totalRequests', totalRequests, 'sum', '1');
-    addMetric('getRequests', getRequests, 'sum', '1');
-    addMetric('postRequests', postRequests, 'sum', '1');
-    addMetric('putRequests', putRequests, 'sum', '1');
-    addMetric('deleteRequests', deleteRequests, 'sum', '1');
+    addIntMetric('totalRequests', totalRequests, 'sum', '1');
+    addIntMetric('getRequests', getRequests, 'sum', '1');
+    addIntMetric('postRequests', postRequests, 'sum', '1');
+    addIntMetric('putRequests', putRequests, 'sum', '1');
+    addIntMetric('deleteRequests', deleteRequests, 'sum', '1');
 }
 
 function systemMetrics() {
     memoryUsage = getMemoryUsagePercentage();
     cpuUsage = getCpuUsagePercentage();
-    addMetric('memoryUsage', memoryUsage, 'gauge', '%');
-    addMetric('cpuUsage', cpuUsage, 'gauge', '%');
+    addDoubleMetric('memoryUsage', memoryUsage, 'gauge', '%');
+    addDoubleMetric('cpuUsage', cpuUsage, 'gauge', '%');
 }
 
 function statsMetrics() {
@@ -148,21 +148,21 @@ function resetMetrics() {
     putRequests = 0;
 
     // system Metrics
-    memoryUsage = 0;
-    cpuUsage = 0;
+    memoryUsage = 0.0;
+    cpuUsage = 0.0;
 
     // stats Metrics
     successfulAuth = 0;
     failedAuth = 0;
     totalReqLatency
-    requestLat = 0;
+    requestLat = 0.0;
     totalPizzaLatency = 0;
-    pizzaLat = 0;
+    pizzaLat = 0.0;
     numPizzaReq = 0;
     activeUsers = 0;
     pizzasSold = 0;
     pizzaFails = 0;
-    revenue = 0;
+    revenue = 0.0;
 }
 
 function sendMetricsPeriodically(period) {
@@ -291,7 +291,7 @@ async function pizzaLatencyTracker(req, res, next) {
         });
         revenue += orderRevenue;
     });
-    
+
     res.on('error', () => {
         pizzaFails++;
     });
