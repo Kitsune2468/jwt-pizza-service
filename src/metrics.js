@@ -233,72 +233,67 @@ async function requestTracker(req, res, next) {
             break;
     }
 
+    const send = res.send;
+
     res.on('finish', () => {
-        console.log("Hit finish requestTracker");
+        console.log("Start Hit requestTracker finish");
         const end = Date.now();
         const duration = end - start;
         totalReqLatency += duration;
-    });
-
-    res.on('close', () => {
-        console.log("Hit close requestTracker");
-        const end = Date.now();
-        const duration = end - start;
-        totalReqLatency += duration;
+        console.log("End Hit finish requestTracker totalReqLatency = "+ totalReqLatency);
     });
 
     next();
 }
 
-async function activeUserTracker(req, res, next) {
-    switch(req.method) {
-        case 'PUT':
-            activeUsers++;
-            res.on('finish', () => {
-                console.log("DEBUG: Hit successfulAuth");
-                successfulAuth++;
-            });
+// async function activeUserTracker(req, res, next) {
+//     switch(req.method) {
+//         case 'PUT':
+//             activeUsers++;
+//             res.on('finish', () => {
+//                 console.log("DEBUG: Hit successfulAuth");
+//                 successfulAuth++;
+//             });
         
-            res.on('error', () => {
-                console.log("DEBUG: Hit failedAuth");
-                failedAuth++;
-            });
-            break;
-        case 'DELETE':
-            activeUsers--;
-            break;
-    }
-    console.log("DEBUG: Hit active user tracker");
+//             res.on('error', () => {
+//                 console.log("DEBUG: Hit failedAuth");
+//                 failedAuth++;
+//             });
+//             break;
+//         case 'DELETE':
+//             activeUsers--;
+//             break;
+//     }
+//     console.log("DEBUG: Hit active user tracker");
 
-    next();
+//     next();
+// }
+
+function addActiveUser() {
+    activeUsers++;
+}
+function removeActiveUser() {
+    activeUsers--;
 }
 
-async function pizzaLatencyTracker(req, res, next) {
-    const start = Date.now();
-    numPizzaReq++;
+function addRevenue(income) {
+    revenue += income;
+}
 
-    res.on('close', () => {
-        const end = Date.now();
-        const duration = end - start;
-        totalPizzaLatency += duration;
-
-        const orderItems = res.body.order.items;
-        pizzasSold += orderItems.length;
-
-        let orderRevenue = 0;
-        orderItems.forEach(item => {
-            orderRevenue += item.price;
-        });
-        revenue += orderRevenue;
-    });
-
-    res.on('error', () => {
-        pizzaFails++;
-    });
-
-    next();
-};
+function addSuccessfulAuth() {
+    successfulAuth++;
+}
+function addFailedAuth() {
+    failedAuth++;
+}
 
 sendMetricsPeriodically(60000);
 
-module.exports = {requestTracker, activeUserTracker, pizzaLatencyTracker};
+module.exports = {
+    requestTracker, 
+    addActiveUser, 
+    removeActiveUser, 
+    addRevenue, 
+    addSuccessfulAuth, 
+    addFailedAuth
+};

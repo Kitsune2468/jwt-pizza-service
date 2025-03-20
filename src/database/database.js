@@ -4,6 +4,7 @@ const config = require('../config.js');
 const { StatusCodeError } = require('../endpointHelper.js');
 const { Role } = require('../model/model.js');
 const dbModel = require('./dbModel.js');
+const metrics = require('./metrics.js');
 class DB {
   constructor() {
     this.initialized = this.initializeDatabase();
@@ -101,6 +102,7 @@ class DB {
     const connection = await this.getConnection();
     try {
       await this.query(connection, `INSERT INTO auth (token, userId) VALUES (?, ?)`, [token, userId]);
+      metrics.addActiveUser();
     } finally {
       connection.end();
     }
@@ -122,6 +124,7 @@ class DB {
     const connection = await this.getConnection();
     try {
       await this.query(connection, `DELETE FROM auth WHERE token=?`, [token]);
+      metrics.removeActiveUser();
     } finally {
       connection.end();
     }
@@ -150,6 +153,7 @@ class DB {
       for (const item of order.items) {
         const menuId = await this.getID(connection, 'id', item.menuId, 'menu');
         await this.query(connection, `INSERT INTO orderItem (orderId, menuId, description, price) VALUES (?, ?, ?, ?)`, [orderId, menuId, item.description, item.price]);
+        metrics.addRevenue(item.price);
       }
       return { ...order, id: orderId };
     } finally {
