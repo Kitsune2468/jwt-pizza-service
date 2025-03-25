@@ -1,4 +1,4 @@
-const logger = require('./logger');
+const logger = require('pizza-logger');
 
 class StatusCodeError extends Error {
   constructor(message, statusCode) {
