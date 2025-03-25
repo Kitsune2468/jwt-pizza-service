@@ -154,7 +154,7 @@ function resetMetrics() {
     // stats Metrics
     successfulAuth = 0;
     failedAuth = 0;
-    totalReqLatency
+    totalReqLatency = 0.0;
     requestLat = 0.0;
     totalPizzaLatency = 0;
     pizzaLat = 0.0;
