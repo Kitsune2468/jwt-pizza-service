@@ -1,8 +1,8 @@
 const config = require('./config');
 //const Logger = require('pizza-logger');
 
-class Logger {
-  httpLogger = (req, res, next) => {
+
+  async function httpLogger(req, res, next) {
     let send = res.send;
     res.send = (resBody) => {
       const logData = {
@@ -13,52 +13,52 @@ class Logger {
         reqBody: JSON.stringify(req.body),
         resBody: JSON.stringify(resBody),
       };
-      const level = this.statusToLogLevel(res.statusCode);
-      this.log(level, 'http', logData);
+      const level = statusToLogLevel(res.statusCode);
+      log(level, 'http', logData);
       res.send = send;
       return res.send(resBody);
     };
     next();
   };
 
-  dbLogger(query) {
-    this.log('info', 'db', query);
+  function dbLogger(query) {
+    log('info', 'db', query);
   }
 
-  factoryLogger(orderInfo) {
-    this.log('info', 'factory', orderInfo);
+  function factoryLogger(orderInfo) {
+    log('info', 'factory', orderInfo);
   }
 
-  unhandledErrorLogger(err) {
-    this.log('error', 'unhandledError', { message: err.message, status: err.statusCode });
+  function unhandledErrorLogger(err) {
+    log('error', 'unhandledError', { message: err.message, status: err.statusCode });
   }
 
-  log(level, type, logData) {
+  function log(level, type, logData) {
     const labels = { component: config.logger.source, level: level, type: type };
-    const values = [this.nowString(), this.sanitize(logData)];
+    const values = [nowString(), sanitize(logData)];
     const logEvent = { streams: [{ stream: labels, values: [values] }] };
 
-    this.sendLogToGrafana(logEvent);
+    sendLogToGrafana(logEvent);
   }
 
-  statusToLogLevel(statusCode) {
+  function statusToLogLevel(statusCode) {
     if (statusCode >= 500) return 'error';
     if (statusCode >= 400) return 'warn';
     return 'info';
   }
 
-  nowString() {
+  function nowString() {
     return (Math.floor(Date.now()) * 1000000).toString();
   }
 
-  sanitize(logData) {
+  function sanitize(logData) {
     logData = JSON.stringify(logData);
     logData = logData.replace(/\\"password\\":\s*\\"[^"]*\\"/g, '\\"password\\": \\"*****\\"');
     logData = logData.replace(/\\password\\=\s*\\"[^"]*\\"/g, '\\"password\\": \\"*****\\"');
     return logData;
   }
 
-  sendLogToGrafana(event) {
+  function sendLogToGrafana(event) {
     const body = JSON.stringify(event);
     fetch(`${config.logger.url}`, {
       method: 'post',
@@ -71,6 +71,6 @@ class Logger {
       if (!res.ok) console.log('Failed to send log to Grafana');
     });
   }
-}
-const loggerObj = new Logger();
-module.exports = loggerObj;
+
+
+module.exports = {httpLogger, dbLogger, factoryLogger, unhandledErrorLogger};

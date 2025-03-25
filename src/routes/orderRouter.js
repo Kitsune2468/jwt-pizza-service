@@ -3,8 +3,8 @@ const config = require('../config.js');
 const { Role, DB } = require('../database/database.js');
 const { authRouter } = require('./authRouter.js');
 const { asyncHandler, StatusCodeError } = require('../endpointHelper.js');
-const Logger = require('../logger.js');
-const logger = Logger.loggerObj;
+const logger = require('../logger.js');
+
 
 const orderRouter = express.Router();
 
