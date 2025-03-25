@@ -1,6 +1,7 @@
-//const config = require('./config');
-const logger = require('pizza-logger');
+const config = require('./config');
+const Logger = require('pizza-logger');
 
+const logger = new Logger(config);
 // class Logger {
 //   httpLogger = (req, res, next) => {
 //     let send = res.send;
