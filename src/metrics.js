@@ -234,11 +234,11 @@ async function requestTracker(req, res, next) {
     }
 
     res.on('finish', () => {
-        console.log("Start Hit requestTracker finish");
+        //console.log("Start Hit requestTracker finish");
         const end = Date.now();
         const duration = end - start;
         totalReqLatency += duration;
-        console.log("End Hit finish requestTracker totalReqLatency = "+ totalReqLatency);
+        //console.log("End Hit finish requestTracker totalReqLatency = "+ totalReqLatency);
     });
 
     next();
