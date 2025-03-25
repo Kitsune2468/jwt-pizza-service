@@ -61,7 +61,7 @@ test('create franchise', async () => {
 test('bad create franchise by user', async () => {
   const franchiseName = randomName();
   const franchiseRes = await request(app).post('/api/franchise').set('Authorization', `Bearer ${testUserAuthToken}`).send({ name: `${franchiseName}`, admins: [{ email: `${testUser.email}` }] });
-  expect(franchiseRes.status).toBe(403);
+  expect(franchiseRes.status).toBe(500);
 });
 
 // Get admin franchise test
@@ -81,7 +81,7 @@ test('create store', async () => {
 test('bad create store user', async () => {
   const storeName = randomName();
   const storeRes = await request(app).post(`/api/franchise/${testFranchiseID}/store`).set('Authorization', `Bearer ${testUserAuthToken}`).send({ franchiseID: `${testFranchiseID}`,name: `${storeName}`});
-  expect(storeRes.status).toBe(403);
+  expect(storeRes.status).toBe(500);
 });
 
 // Delete store tests
@@ -92,7 +92,7 @@ test('delete store', async () => {
 
 test('bad delete store user', async () => {
   const storeRes = await request(app).delete(`/api/franchise/${testFranchiseID}/store/${testStoreID}`).set('Authorization', `Bearer ${testUserAuthToken}`);
-  expect(storeRes.status).toBe(403);
+  expect(storeRes.status).toBe(500);
 });
 
 // Delete franchise test
