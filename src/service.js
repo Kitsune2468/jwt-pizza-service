@@ -6,7 +6,7 @@ const version = require('./version.json');
 const config = require('./config.js');
 const metrics = require('./metrics.js');
 const Logger = require('./logger.js');
-const logger = Logger.logger;
+const logger = Logger.loggerObj;
 
 const app = express();
 app.use(express.json());

@@ -6,7 +6,7 @@ const { Role } = require('../model/model.js');
 const dbModel = require('./dbModel.js');
 const metrics = require('../metrics.js');
 const Logger = require('../logger.js');
-const logger = Logger.logger;
+const logger = Logger.loggerObj;
 
 class DB {
   constructor() {

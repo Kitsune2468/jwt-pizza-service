@@ -1,5 +1,5 @@
 const Logger = require('./logger.js');
-const logger = Logger.logger;
+const logger = Logger.loggerObj;
 
 class StatusCodeError extends Error {
   constructor(message, statusCode) {
