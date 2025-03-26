@@ -22,7 +22,7 @@ const config = require('./config');
   };
 
   function dbLogger(query) {
-    log('info', 'db', query);
+    log('info', 'db', {query});
   }
 
   function factoryLogger(orderInfo) {
